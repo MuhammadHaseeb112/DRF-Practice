@@ -1,0 +1,150 @@
+# for JWT Authentication
+for urls.py:
+	from rest_framework_simplejwt.views import TokenObtainPairView,TokenRefreshView, TokenVerifyView
+	
+
+Add these three lines in path 
+	path('getJWTToken/', TokenObtainPairView.as_view()), # this class get the access token and refresh token for us
+    	path('refreshJWTToken/', TokenRefreshView.as_view()), # this class refresh token for us
+    	path('verifyJWTToken/', TokenVerifyView.as_view()), # this class Verify token for us
+
+
+how to generate/get Token:
+	Using httpie in Terminal:
+		http POST http://127.0.0.1:8000/getJWTToken/ username='Muhammad' password='M.haseeb@123' 
+		in the response we will get access and refresh token
+		[
+
+{
+    "access": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjg3ODY2MTI4LCJpYXQiOjE2ODc4NjU4MjgsImp0aSI6IjkwNjNkYjY1MzJiMjRkMzFhZGQ4ZThiMzExNTMxOGMwIiwidXNlcl9pZCI6Mn0.fzSa8GTRKOam0x38TZJbYqc3momY3ZHJDtD0Ub2sufc",
+    "refresh": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTY4Nzk1MjIyOCwiaWF0IjoxNjg3ODY1ODI4LCJqdGkiOiI2MjIwMDYwNjFlNmQ0YjIwODI4N2QzMzg1OWVhYTk5OCIsInVzZXJfaWQiOjJ9.H0n8q4FImGCGS3JfSiu9PA3LVDnOraV6160jixyZGSs"
+}
+]
+
+access Token is used to access api Note: Default Access token is Valid for (5 min)
+refresh Token is used to refresh access token  Note: Default access token is valid for (24 hours/1 day) 
+
+
+
+we can verify our access token by using command 
+	http POST http://127.0.0.1:8000/verifyJWTToken/ token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjg3ODY2MTI4LCJpYXQiOjE2ODc4NjU4MjgsImp0aSI6IjkwNjNkYjY1MzJiMjRkMzFhZGQ4ZThiMzExNTMxOGMwIiwidXNlcl9pZCI6Mn0.fzSa8GTRKOam0x38TZJbYqc3momY3ZHJDtD0Ub2sufc" 
+
+in the response we will get this response
+If token is Valid
+	HTTP/1.1 200 OK
+	Allow: POST, OPTIONS
+	Content-Length: 2
+	Content-Type: application/json
+	Cross-Origin-Opener-Policy: same-origin
+	Date: Tue, 27 Jun 2023 11:38:34 GMT
+	Referrer-Policy: same-origin	
+	Server: WSGIServer/0.2 CPython/3.10.2
+	Vary: Accept
+	X-Content-Type-Options: nosniff
+	X-Frame-Options: DENY
+
+	{}
+
+If token is NotValid
+	HTTP/1.1 401 Unauthorized
+	Allow: POST, OPTIONS
+	Content-Length: 65
+	Content-Type: application/json
+	Cross-Origin-Opener-Policy: same-origin
+	Date: Tue, 27 Jun 2023 11:44:22 GMT
+	Referrer-Policy: same-origin
+	Server: WSGIServer/0.2 CPython/3.10.2
+	Vary: Accept
+	WWW-Authenticate: Bearer realm="api"
+	X-Content-Type-Options: nosniff
+	X-Frame-Options: DENY
+
+	{
+    		"code": "token_not_valid",
+    		"detail": "Token is invalid or expired"
+	}
+
+in the case of invalid token user have 2 options 
+	1 user can again send request with username and password and get new access token like above
+	2 user can use refresh token to get the new access token
+
+For Refresh token:
+	http POST http://127.0.0.1:8000/refreshJWTToken/ refresh="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTY4Nzk1MjIyOCwiaWF0IjoxNjg3ODY1ODI4LCJqdGkiOiI2MjIwMDYwNjFlNmQ0YjIwODI4N2QzMzg1OWVhYTk5OCIsInVzZXJfaWQiOjJ9.H0n8q4FImGCGS3JfSiu9PA3LVDnOraV6160jixyZGSs"
+
+in the response 
+If refresh token is valid we get the new access token
+	
+	HTTP/1.1 200 OK
+	Allow: POST, OPTIONS
+	Content-Length: 241
+	Content-Type: application/json
+	Cross-Origin-Opener-Policy: same-origin
+	Date: Tue, 27 Jun 2023 12:07:02 GMT
+	Referrer-Policy: same-origin
+	Server: WSGIServer/0.2 CPython/3.10.2
+	Vary: Accept
+	X-Content-Type-Options: nosniff
+	X-Frame-Options: DENY
+
+{
+    "access": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjg3ODY3OTIyLCJpYXQiOjE2ODc4NjU4MjgsImp0aSI6IjQ3MjNlYTJjNjNkYjQ3MzRhMTQ1ZDQ0YjE2OTZhNzcyIiwidXNlcl9pZCI6Mn0.blNZsVTZkLVD8kIENrYVbeWTraChrNlPDLlmBJl8gZI"
+}
+
+If refresh token is not valid
+	HTTP/1.1 401 Unauthorized
+	Allow: POST, OPTIONS
+	Content-Length: 65
+	Content-Type: application/json
+	Cross-Origin-Opener-Policy: same-origin
+	Date: Tue, 27 Jun 2023 12:11:51 GMT
+	Referrer-Policy: same-origin
+	Server: WSGIServer/0.2 CPython/3.10.2
+	Vary: Accept
+	WWW-Authenticate: Bearer realm="api"
+	X-Content-Type-Options: nosniff
+	X-Frame-Options: DENY
+
+{
+    "code": "token_not_valid",
+    "detail": "Token is invalid or expired"
+}
+
+We can check data inside the api using this link
+https://jwt.io/
+
+
+how to access api using access token
+
+go to views.py write code 
+from rest_framework_simplejwt.authentication import JWTAuthentication
+
+add these 2 lines in your class
+	authentication_classes = [JWTAuthentication]
+    	permission_classes = [IsAuthenticated]
+
+use this command in terminal 
+http http://127.0.0.1:8000/stuAPI/ 'Authorization:Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjg3ODcyMzEzLCJpYXQiOjE2ODc4NjU4MjgsImp0aSI6IjFkMDJmMjVkMjg4NjRmNGY5YjllNjg5OWVhZTM5MjA4IiwidXNlcl9pZCI6Mn0.9EnVwx-dcj69JN9ESkHWOoXIuX1yU_j8ihErWT1xTkE'
+
+for postman
+step1 pass this url in
+	http://127.0.0.1:8000/stuAPI/
+step2 in headers
+	 pass this Authorization in Key section 
+	 pass 
+Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjg3ODcyMzEzLCJpYXQiOjE2ODc4NjU4MjgsImp0aSI6IjFkMDJmMjVkMjg4NjRmNGY5YjllNjg5OWVhZTM5MjA4IiwidXNlcl9pZCI6Mn0.9EnVwx-dcj69JN9ESkHWOoXIuX1yU_j8ihErWT1xTkE 
+in key section
+
+
+How to over ride default simple_JWT seetings
+go to your projects seetings.py and write this code
+
+from datetime import timedelta
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "ROTATE_REFRESH_TOKENS": False,     # if ROTATE_REFRESH_TOKENS is True the after every refresh it also provide us a new refresh token 
+
+
+
+
