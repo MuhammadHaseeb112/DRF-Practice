@@ -1,0 +1,30 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Get Api</title>
+</head>
+<body>
+<!-- home.html -->
+<a href="{% url 'post_data' %}">Add New</a> <br><br>
+
+  
+  <!-- Display the retrieved data -->
+
+
+    {% for d in data %}
+    <h1>{{d.id}}</h1>
+    <h2>{{d.p_name}}</h2>
+    <h4>{{d.p_catagory}}</h4>
+    <h3>{{d.p_price}}</h3>
+    <h5>{{d.p_disc}}</h5>
+    <img src="{{ d.p_img }}" alt="{{d.p_img}}"><br><br>
+    <a href="/edit_data/{{d.id}}">Edit</a>
+    <a href="/delete_data/{{d.id}}">Delete</a>
+
+    {% endfor %}
+</body>
+</html>
